@@ -1,65 +1,93 @@
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
+#define MSG_TEXT "An enormous puppy was looking down at her with large round eyes, and feebly stretching out one paw, trying to touch her. Poor little thing! said Alice, in a coaxing tone, and she tried hard to whistle to it; but she was terribly frightened all the time at the thought that it might be hungry, in which case it would be very likely to eat her up in spite of all her coaxing."
+#define TX 0
+#define DELAY 1000
+
 #define ANCHO 128 
 #define ALTO 64
 #define OLED_RESET 4
 
-Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
+//Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
 
-String receivedMessage;
-int error = 0;
-//String data = "Alicia empezaba a estar muy cansada de estar sentada con su hermana a la orilla del rio, y de no tener nada que hacer \n";
-String data = "Hello UART \n";
+static int error_counter = 0;
+static int tx_counter = 0;
+static String msg(MSG_TEXT);
+static bool ACK = false;
+
 void setup() {
-  Serial.begin(115200);    // Initialize the Serial monitor for debugging
-  //Serial1.begin(9600);
-  //SerialACK.begin(9600);
-  //Serial1.begin(9600);   // Initialize Serial1 for sending data
-  Wire.begin();                            // Inicializa bus I2C
-  oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  pinMode(LED_BUILTIN, OUTPUT);      // set LED pin as output
-  //digitalWrite(LED_BUILTIN, LOW);    // switch off LED pin
+  Serial.begin(115200);
+  //Wire.begin(); 
+  //oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  Serial.setTimeout(50);
+  //Serial1.begin(115200);
+  //Serial1.setTimeout(50);
+  //Serial2.begin(115200);
+  //Serial2.setTimeout(50);
 }
 
 void loop() {
-  while (Serial.available() > 0) {    
-    //char receivedChar = Serial.read();
-    String receivedMessage = Serial.readString();
-    //if (receivedChar == '\n') {
-      //Serial.print("Cadena recibida: ");
-      //Serial.println(receivedMessage);  // Print the received message in the Serial monitor
-      //delay(2000);
-      //if (receivedMessage == data) {
-      //receivedMessage += '\0';
-      if (receivedMessage.equals(data)) {
-        //Serial.write("ACK");
-        Serial.print("Cadena correcta: ");
-        Serial.println(receivedMessage);
-        //receivedMessage = "";
-      } else {
-        error++;
-        //Serial.print("Error numero: ");
-        //Serial.println(error); 
-        Serial.print("Cadena erronea: ");
-        Serial.println(receivedMessage);
-        //receivedMessage = "";
+    /*if (tx_counter < 1000)
+    {
+      if (TX)
+      {
+        serial_tx(msg);
+        tx_counter++;
+        Serial.println("Number of transmissions: " + String(tx_counter));
       }
-      receivedMessage = "";  // Reset the received message
-    //} else {
-    //  receivedMessage += receivedChar;  // Append characters to the received message
-    //}
-  }
-  oled.clearDisplay();                   // Limpia pantalla
-  oled.setTextColor(WHITE);              // Establece color al único disponible (pantalla monocromo)
+      else
+        serial_rx(msg);
+    }
+    else
+      while(1);*/
+    
+    serial_rx(msg);
+    //delay(1);
+      
+}
+/*
+void serial_tx(String& msg)
+{
+  //Serial1.print(msg);
+  Serial.print(msg);
+  //Serial1.flush();
+  Serial.flush();
+  Serial.println("Sending message: " + msg);
+  //while(Serial1.available() == 0);
+  while(Serial.available() == 0);
+  Serial.println(char(Serial1.read()));
+}*/
+
+void serial_rx(String& msg)
+{
+  Serial.println("Waiting for a message");
+  //Serial.flush();
+  //oled.setTextSize(1);                   
+  //oled.setCursor(0, 30);                // Ubica cursor en coordenadas 10,50
+  //oled.print("Waiting for a message");
+  while(Serial.available() == 0);
+  //oled.clearDisplay();                   // Limpia pantalla
+    
+  //while(Serial2.available() == 0);
+  auto msg_rcv = Serial.readString();
+  if (msg != msg_rcv)
+    error_counter++;
+  /*oled.setTextColor(WHITE);              // Establece color al único disponible (pantalla monocromo)
   oled.setTextSize(1);
   oled.setCursor(0, 0);                  // Ubica cursor en inicio de coordenadas 0,0
-  oled.print(receivedMessage);               // Escribe en pantalla el texto
+  oled.print(msg_rcv);               // Escribe en pantalla el texto
   oled.setCursor(0, 20);                // Ubica cursor en coordenadas 10,50
   oled.setTextSize(1);                   // Establece tamaño de texto en 1
-  oled.print(error);  // Manda a llamar el obtener errores
-  oled.print(" errores.");               // Escribe texto
-  oled.display(); 
-  //Serial.print("Errores totales: ");
-  //Serial.println(error);
-  delay(1);
+  oled.print("Number of errors: ");  // Manda a llamar el obtener errores
+  oled.print(error_counter);               // Escribe texto
+  oled.display(); */
+  Serial.println(msg_rcv);
+  Serial.println("Number of errors: " + String(error_counter));
+  //Serial.flush();
+  
+  //Serial.flush();
+  //Serial.write("ACK");
+  //Serial.flush();
+  //Serial2.write("A"); //
+  //wSerial2.flush();
 }

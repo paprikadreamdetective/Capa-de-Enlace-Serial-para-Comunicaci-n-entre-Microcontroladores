@@ -10,5 +10,6 @@ class DataLink:
         pdu = self.PDU(message)
         return (pdu)
 
-    def decapsulate(self, pdu):
-        return (pdu.message)
+    def decapsulate(self, message):
+        pdu = self.PDU(message)
+        return (pdu)
