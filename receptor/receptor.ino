@@ -8,7 +8,7 @@
 #define ALTO 64
 #define OLED_RESET 4
 
-//Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
+Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
 
 static int error_counter = 0;
 static int tx_counter = 0;
@@ -17,9 +17,9 @@ static bool ACK = false;
 
 void setup() {
   Serial.begin(115200);
-  //Wire.begin(); 
-  //oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   Serial.setTimeout(50);
+  Wire.begin(); 
+  oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   //Serial1.begin(115200);
   //Serial1.setTimeout(50);
   //Serial2.begin(115200);
@@ -62,9 +62,11 @@ void serial_rx(String& msg)
 {
   Serial.println("Waiting for a message");
   //Serial.flush();
-  //oled.setTextSize(1);                   
-  //oled.setCursor(0, 30);                // Ubica cursor en coordenadas 10,50
-  //oled.print("Waiting for a message");
+  oled.clearDisplay();
+  oled.display();
+  oled.setTextSize(1);                   
+  oled.setCursor(0, 30);                // Ubica cursor en coordenadas 10,50
+  oled.print("Waiting for a message");
   while(Serial.available() == 0);
   //oled.clearDisplay();                   // Limpia pantalla
     
@@ -91,3 +93,4 @@ void serial_rx(String& msg)
   //Serial2.write("A"); //
   //wSerial2.flush();
 }
+
