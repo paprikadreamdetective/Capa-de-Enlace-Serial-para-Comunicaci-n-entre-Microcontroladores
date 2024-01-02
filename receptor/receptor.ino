@@ -1,12 +1,11 @@
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
-#define MSG_TEXT "An enormous puppy was looking down at her with large round eyes, and feebly stretching out one paw, trying to touch her. Poor little thing! said Alice, in a coaxing tone, and she tried hard to whistle to it; but she was terribly frightened all the time at the thought that it might be hungry, in which case it would be very likely to eat her up in spite of all her coaxing."
+#include <BitArray.h>
+
+//#define MSG_TEXT "An enormous puppy was looking down at her with large round eyes, and feebly stretching out one paw, trying to touch her. Poor little thing! said Alice, in a coaxing tone, and she tried hard to whistle to it; but she was terribly frightened all the time at the thought that it might be hungry, in which case it would be very likely to eat her up in spite of all her coaxing."
+#define MSG_TEXT "Hello World"
 #define TX 0
 #define DELAY 1000
-
-#define ANCHO 128 
-#define ALTO 64
-#define OLED_RESET 4
 
 
 static int error_counter = 0;
@@ -14,9 +13,13 @@ static int tx_counter = 0;
 static String msg(MSG_TEXT);
 static bool ACK = false;
 
+BitArray msg_bit_array;
+
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(50);
+  msg_bit_array.begin(8, 8*msg.length());
+  msg_bit_array.clear();
   //Serial1.begin(115200);
   //Serial1.setTimeout(50);
   //Serial2.begin(115200);
@@ -40,7 +43,6 @@ void loop() {
     
     serial_rx(msg);
     //delay(1);
-      
 }
 /*
 void serial_tx(String& msg)
@@ -77,6 +79,8 @@ void serial_rx(String& msg)
   oled.print(error_counter);               // Escribe texto
   oled.display(); */
   Serial.println(msg_rcv);
+  StringToBitArray(msg_rcv, msg_bit_array);
+  printBitArray(msg_bit_array);
   Serial.println("Number of errors: " + String(error_counter));
   Serial.flush();
   
@@ -87,3 +91,26 @@ void serial_rx(String& msg)
   //wSerial2.flush();
 }
 
+void StringToBitArray(String &str, BitArray &bitArray) {
+  int index = 0;
+  int str_index = 0;
+  //char currentChar = str.charAt(index);
+  //while (*str != '\0' && index < bitArray.capacity()) {
+  while (str.charAt(str_index) != '\0' && index < bitArray.capacity()) {
+    char currentChar = str.charAt(str_index);
+    for (int i = 7; i >= 0; i--) {
+      bitArray.set(index++, (currentChar >> i) & 1);
+    }
+    str_index++;
+  }
+}
+
+void printBitArray(const BitArray &bitArray) {
+  for (int i = 0; i < bitArray.capacity(); i++) {
+    Serial.print(bitArray.get(i));
+    if ((i + 1) % 8 == 0) {
+      Serial.print(' ');  // Agregar espacio cada 8 bits para mayor legibilidad
+    }
+  }
+  Serial.println();
+}
